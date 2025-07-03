@@ -10,7 +10,8 @@ use schemars::{
 };
 
 use crate::{
-    Bot, Channel, Database, Emoji, Invite, Member, Message, Server, ServerBan, User, Webhook,
+    AdminToken, Bot, Channel, Database, Emoji, Invite, Member, Message, Server, ServerBan, User,
+    Webhook,
 };
 
 /// Reference to some object in the database
@@ -23,6 +24,11 @@ impl<'a> Reference<'a> {
     /// Create a Ref from an unchecked string
     pub fn from_unchecked(id: &'a str) -> Reference<'a> {
         Reference { id }
+    }
+
+    /// Fetch Admin Token from Ref
+    pub async fn as_admin_token(&self, db: &Database) -> Result<AdminToken> {
+        db.admin_token_fetch(&self.id).await
     }
 
     /// Fetch ban from Ref
