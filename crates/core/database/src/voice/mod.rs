@@ -16,7 +16,7 @@ mod voice_client;
 pub use voice_client::VoiceClient;
 
 async fn get_connection() -> Result<Conn> {
-    _get_connection().await.to_internal_error()
+    _get_connection().await.map_err(|_| create_error!(InternalError))
 }
 
 pub async fn raise_if_in_voice(user: &User, channel_id: &str) -> Result<()> {

@@ -226,7 +226,7 @@ pub trait ToRevoltError<T> {
     fn to_internal_error(self) -> Result<T, Error>;
 }
 
-impl<T, E: std::fmt::Debug> ToRevoltError<T> for Result<T, E> {
+impl<T, E: std::fmt::Debug + std::error::Error> ToRevoltError<T> for Result<T, E> {
     #[track_caller]
     fn to_internal_error(self) -> Result<T, Error> {
         let loc = Location::caller();
@@ -234,6 +234,8 @@ impl<T, E: std::fmt::Debug> ToRevoltError<T> for Result<T, E> {
         self
             .map_err(|e| {
                 log::error!("{e:?}");
+                #[cfg(feature = "sentry")]
+                sentry::capture_error(&e);
 
                 Error {
                     error_type: ErrorType::InternalError,
