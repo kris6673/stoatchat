@@ -25,7 +25,7 @@ struct MigrationInfo {
     revision: i32,
 }
 
-pub const LATEST_REVISION: i32 = 48; // MUST BE +1 to last migration
+pub const LATEST_REVISION: i32 = 49; // MUST BE +1 to last migration
 
 pub async fn migrate_database(db: &MongoDb) {
     let migrations = db.col::<Document>("migrations");
@@ -1246,8 +1246,8 @@ pub async fn run_migrations(db: &MongoDb, revision: i32) -> i32 {
             .expect("Failed to update voice channels");
     };
 
-        if revision <= 47 {
-        info!("Running migration [revision 47 / 29-04-2025]: Add Video to default permissions");
+        if revision <= 48 {
+        info!("Running migration [revision 48 / 22-10-2025]: Add Video + Listen to default permissions");
 
         db.col::<Document>("servers")
             .update_many(
@@ -1255,7 +1255,7 @@ pub async fn run_migrations(db: &MongoDb, revision: i32) -> i32 {
                 doc! {
                     "$bit": {
                         "default_permissions": {
-                            "or": ChannelPermission::Video as i64
+                            "or": (ChannelPermission::Video + ChannelPermission::Speak + ChannelPermission::Listen) as i64
                         },
                     }
                 }
