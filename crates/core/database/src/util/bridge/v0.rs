@@ -1413,29 +1413,36 @@ impl From<crate::AuditLogEntryAction> for AuditLogEntryAction {
             crate::AuditLogEntryAction::MemberEdit {
                 user,
                 remove,
-                partial,
+                before,
+                after,
             } => AuditLogEntryAction::MemberEdit {
                 user,
                 remove: remove.into_iter().map(Into::into).collect(),
-                partial: partial.into(),
+                before: before.into(),
+                after: after.into(),
             },
             crate::AuditLogEntryAction::MemberKick { user } => {
                 AuditLogEntryAction::MemberKick { user }
             }
-            crate::AuditLogEntryAction::ServerEdit { remove, partial } => {
-                AuditLogEntryAction::ServerEdit {
-                    remove: remove.into_iter().map(Into::into).collect(),
-                    partial: partial.into(),
-                }
-            }
+            crate::AuditLogEntryAction::ServerEdit {
+                remove,
+                before,
+                after,
+            } => AuditLogEntryAction::ServerEdit {
+                remove: remove.into_iter().map(Into::into).collect(),
+                before: before.into(),
+                after: after.into(),
+            },
             crate::AuditLogEntryAction::RoleEdit {
                 role,
                 remove,
-                partial,
+                before,
+                after,
             } => AuditLogEntryAction::RoleEdit {
                 role,
                 remove: remove.into_iter().map(Into::into).collect(),
-                partial: partial.into(),
+                before: before.into(),
+                after: after.into(),
             },
             crate::AuditLogEntryAction::RoleCreate { role, name } => {
                 AuditLogEntryAction::RoleCreate { role, name }
@@ -1452,11 +1459,13 @@ impl From<crate::AuditLogEntryAction> for AuditLogEntryAction {
             crate::AuditLogEntryAction::ChannelEdit {
                 channel,
                 remove,
-                partial,
+                before,
+                after,
             } => AuditLogEntryAction::ChannelEdit {
                 channel,
                 remove: remove.into_iter().map(Into::into).collect(),
-                partial: partial.into(),
+                before: before.into(),
+                after: after.into(),
             },
             crate::AuditLogEntryAction::ChannelRolePermissionsEdit {
                 channel,
@@ -1473,12 +1482,24 @@ impl From<crate::AuditLogEntryAction> for AuditLogEntryAction {
             crate::AuditLogEntryAction::InviteDelete { invite, channel } => {
                 AuditLogEntryAction::InviteDelete { invite, channel }
             }
-            crate::AuditLogEntryAction::WebhookCreate { webhook, name, channel } => {
-                AuditLogEntryAction::WebhookCreate { webhook, name, channel }
-            }
-            crate::AuditLogEntryAction::WebhookDelete { webhook, name, channel } => {
-                AuditLogEntryAction::WebhookDelete { webhook, name, channel }
-            }
+            crate::AuditLogEntryAction::WebhookCreate {
+                webhook,
+                name,
+                channel,
+            } => AuditLogEntryAction::WebhookCreate {
+                webhook,
+                name,
+                channel,
+            },
+            crate::AuditLogEntryAction::WebhookDelete {
+                webhook,
+                name,
+                channel,
+            } => AuditLogEntryAction::WebhookDelete {
+                webhook,
+                name,
+                channel,
+            },
             crate::AuditLogEntryAction::EmojiDelete { emoji, name } => {
                 AuditLogEntryAction::EmojiDelete { emoji, name }
             }

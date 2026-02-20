@@ -1,5 +1,6 @@
 use revolt_database::{
-    AuditLogEntryAction, Database, User, util::{permissions::DatabasePermissionQuery, reference::Reference}
+    util::{permissions::DatabasePermissionQuery, reference::Reference},
+    AuditLogEntryAction, Database, User,
 };
 use revolt_permissions::{calculate_server_permissions, ChannelPermission};
 use revolt_result::Result;
@@ -29,9 +30,11 @@ pub async fn unban(
     let ban = target.as_ban(db, &server.id).await?;
     db.delete_ban(&ban.id).await?;
 
-    AuditLogEntryAction::BanDelete { user: target.id.to_string() }
-        .insert(db, server.id, reason.0, user.id)
-        .await;
+    AuditLogEntryAction::BanDelete {
+        user: target.id.to_string(),
+    }
+    .insert(db, server.id, reason.0, user.id)
+    .await;
 
     Ok(EmptyResponse)
 }

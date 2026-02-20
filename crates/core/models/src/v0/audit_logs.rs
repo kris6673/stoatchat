@@ -1,4 +1,7 @@
-use crate::v0::{Member, User, FieldsMember, FieldsRole, FieldsServer, FieldsChannel, PartialChannel, PartialMember, PartialRole, PartialServer};
+use crate::v0::{
+    FieldsChannel, FieldsMember, FieldsRole, FieldsServer, Member, PartialChannel, PartialMember,
+    PartialRole, PartialServer, User,
+};
 use revolt_permissions::Override;
 
 auto_derived!(
@@ -35,9 +38,10 @@ auto_derived!(
         },
         ChannelEdit {
             channel: String,
-            #[serde(skip_serializing_if = "Vec::is_empty")]
+            #[serde(skip_serializing_if = "Vec::is_empty", default)]
             remove: Vec<FieldsChannel>,
-            partial: PartialChannel,
+            before: PartialChannel,
+            after: PartialChannel,
         },
         ChannelRolePermissionsEdit {
             channel: String,
@@ -50,23 +54,26 @@ auto_derived!(
         },
         MemberEdit {
             user: String,
-            #[serde(skip_serializing_if = "Vec::is_empty")]
+            #[serde(skip_serializing_if = "Vec::is_empty", default)]
             remove: Vec<FieldsMember>,
-            partial: PartialMember,
+            before: PartialMember,
+            after: PartialMember,
         },
         MemberKick {
             user: String,
         },
         ServerEdit {
-            #[serde(skip_serializing_if = "Vec::is_empty")]
+            #[serde(skip_serializing_if = "Vec::is_empty", default)]
             remove: Vec<FieldsServer>,
-            partial: PartialServer,
+            before: PartialServer,
+            after: PartialServer,
         },
         RoleEdit {
             role: String,
-            #[serde(skip_serializing_if = "Vec::is_empty")]
+            #[serde(skip_serializing_if = "Vec::is_empty", default)]
             remove: Vec<FieldsRole>,
-            partial: PartialRole,
+            before: PartialRole,
+            after: PartialRole,
         },
         RoleCreate {
             role: String,
@@ -86,7 +93,7 @@ auto_derived!(
         WebhookCreate {
             webhook: String,
             name: String,
-            channel: String
+            channel: String,
         },
         WebhookDelete {
             webhook: String,

@@ -3,9 +3,9 @@ use std::{collections::HashMap, sync::Arc};
 use futures::lock::Mutex;
 
 use crate::{
-    Bot, Channel, ChannelCompositeKey, ChannelUnread, Emoji, File, FileHash, Invite, Member,
-    MemberCompositeKey, Message, PolicyChange, RatelimitEvent, Report, Server, ServerBan, Snapshot,
-    User, UserSettings, Webhook, AuditLogEntry,
+    AuditLogEntry, Bot, Channel, ChannelCompositeKey, ChannelUnread, Emoji, File, FileHash, Invite,
+    Member, MemberCompositeKey, Message, PolicyChange, RatelimitEvent, Report, Server, ServerBan,
+    Snapshot, User, UserSettings, Webhook,
 };
 
 database_derived!(

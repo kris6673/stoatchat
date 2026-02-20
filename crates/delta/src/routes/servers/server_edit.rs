@@ -1,7 +1,8 @@
 use std::collections::HashSet;
 
 use revolt_database::{
-    AuditLogEntryAction, Database, FieldsServer, File, PartialServer, User, util::{permissions::DatabasePermissionQuery, reference::Reference}
+    util::{permissions::DatabasePermissionQuery, reference::Reference},
+    AuditLogEntryAction, Database, FieldsServer, File, PartialServer, User,
 };
 use revolt_models::v0;
 use revolt_permissions::{calculate_server_permissions, ChannelPermission};
@@ -148,15 +149,22 @@ pub async fn edit(
         server.banner = partial.banner.clone();
     }
 
-    let remove = remove.into_iter().map(Into::into).collect::<Vec<FieldsServer>>();
+    let remove = remove
+        .into_iter()
+        .map(Into::into)
+        .collect::<Vec<FieldsServer>>();
 
-    server
-        .update(db, partial.clone(), remove.clone())
-        .await?;
+    let before = server.generate_diff(&partial, &remove);
 
-    AuditLogEntryAction::ServerEdit { remove, partial }
-        .insert(db, server.id.clone(), reason.0, user.id)
-        .await;
+    server.update(db, partial.clone(), remove.clone()).await?;
+
+    AuditLogEntryAction::ServerEdit {
+        remove,
+        before,
+        after: partial,
+    }
+    .insert(db, server.id.clone(), reason.0, user.id)
+    .await;
 
     Ok(Json(server.into()))
 }

@@ -1,7 +1,8 @@
 use revolt_database::{
     util::{permissions::DatabasePermissionQuery, reference::Reference},
     voice::{delete_voice_channel, VoiceClient},
-    AuditLogEntryAction, Channel, Database, File, PartialChannel, SystemMessage, User, AMQP, FieldsChannel
+    AuditLogEntryAction, Channel, Database, FieldsChannel, File, PartialChannel, SystemMessage,
+    User, AMQP,
 };
 use revolt_models::v0;
 use revolt_permissions::{calculate_channel_permissions, ChannelPermission};
@@ -92,6 +93,8 @@ pub async fn edit(
         .await
         .ok();
     }
+
+    let before_channel = channel.clone();
 
     match &mut channel {
         Channel::Group {
@@ -254,7 +257,17 @@ pub async fn edit(
         _ => return Err(create_error!(InvalidOperation)),
     };
 
-    let remove = data.remove.into_iter().map(|f| f.into()).collect::<Vec<FieldsChannel>>();
+    let remove = data
+        .remove
+        .into_iter()
+        .map(|f| f.into())
+        .collect::<Vec<FieldsChannel>>();
+
+    let before = if before_channel.server().is_some() {
+        Some(before_channel.generate_diff(&partial, &remove))
+    } else {
+        None
+    };
 
     channel.update(db, partial.clone(), remove.clone()).await?;
 
@@ -262,13 +275,14 @@ pub async fn edit(
         delete_voice_channel(voice_client, channel.id(), channel.server()).await?;
     }
 
-    if let Some(server) = channel.server() {
+    if let Some(before) = before {
         AuditLogEntryAction::ChannelEdit {
             channel: channel.id().to_string(),
             remove,
-            partial,
+            before,
+            after: partial,
         }
-        .insert(db, server.to_string(), reason.0, user.id)
+        .insert(db, channel.server().unwrap().to_string(), reason.0, user.id)
         .await;
     };
 

@@ -210,12 +210,15 @@ pub async fn edit(
         .map(Into::into)
         .collect::<Vec<FieldsMember>>();
 
+    let before = member.generate_diff(&partial, &remove);
+
     member.update(db, partial.clone(), remove.clone()).await?;
 
     AuditLogEntryAction::MemberEdit {
         user: member.id.user.clone(),
         remove: remove.clone(),
-        partial,
+        before,
+        after: partial,
     }
     .insert(db, server.id.clone(), reason.0, user.id.clone())
     .await;

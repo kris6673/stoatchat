@@ -137,8 +137,50 @@ mod test {
 
         let status = harness
             .client
+            .patch(format!("/channels/{}", channel.id()))
+            .header(Header::new("X-Audit-Log-Reason", "Test Reason 1"))
+            .header(Header::new("x-session-token", session.token.clone()))
+            .json(&v0::DataEditChannel {
+                description: Some("General chat channel.".to_string()),
+                name: None,
+                owner: None,
+                icon: None,
+                nsfw: None,
+                archived: None,
+                voice: None,
+                remove: Vec::new(),
+            })
+            .dispatch()
+            .await
+            .status();
+
+        assert_eq!(status, Status::Ok);
+
+        let status = harness
+            .client
+            .patch(format!("/channels/{}", channel.id()))
+            .header(Header::new("X-Audit-Log-Reason", "Test Reason 2"))
+            .header(Header::new("x-session-token", session.token.clone()))
+            .json(&v0::DataEditChannel {
+                description: Some("New description.".to_string()),
+                name: None,
+                owner: None,
+                icon: None,
+                nsfw: None,
+                archived: None,
+                voice: None,
+                remove: Vec::new(),
+            })
+            .dispatch()
+            .await
+            .status();
+
+        assert_eq!(status, Status::Ok);
+
+        let status = harness
+            .client
             .delete(format!("/channels/{}", channel.id()))
-            .header(Header::new("X-Audit-Log-Reason", "Test Reason"))
+            .header(Header::new("X-Audit-Log-Reason", "Test Reason 3"))
             .header(Header::new("x-session-token", session.token.clone()))
             .dispatch()
             .await
@@ -160,11 +202,11 @@ mod test {
             panic!("Response included users when shouldnt")
         };
 
-        assert_eq!(entries.len(), 1);
+        assert_eq!(entries.len(), 3);
 
         let entry = &entries[0];
 
-        assert_eq!(entry.reason.as_deref(), Some("Test Reason"));
+        assert_eq!(entry.reason.as_deref(), Some("Test Reason 3"));
         assert_eq!(&entry.server, &server.id);
         assert_eq!(&entry.user, &user.id);
         assert_eq!(
@@ -172,6 +214,48 @@ mod test {
             &v0::AuditLogEntryAction::ChannelDelete {
                 channel: channel.id().to_string(),
                 name: "General".to_string()
+            }
+        );
+
+        let entry = &entries[1];
+
+        assert_eq!(entry.reason.as_deref(), Some("Test Reason 2"));
+        assert_eq!(&entry.server, &server.id);
+        assert_eq!(&entry.user, &user.id);
+        assert_eq!(
+            &entry.action,
+            &v0::AuditLogEntryAction::ChannelEdit {
+                channel: channel.id().to_string(),
+                remove: Vec::new(),
+                before: v0::PartialChannel {
+                    description: Some("General chat channel.".to_string()),
+                    ..Default::default()
+                },
+                after: v0::PartialChannel {
+                    description: Some("New description.".to_string()),
+                    ..Default::default()
+                }
+            }
+        );
+
+        let entry = &entries[2];
+
+        assert_eq!(entry.reason.as_deref(), Some("Test Reason 1"));
+        assert_eq!(&entry.server, &server.id);
+        assert_eq!(&entry.user, &user.id);
+        assert_eq!(
+            &entry.action,
+            &v0::AuditLogEntryAction::ChannelEdit {
+                channel: channel.id().to_string(),
+                remove: Vec::new(),
+                before: v0::PartialChannel {
+                    description: None,
+                    ..Default::default()
+                },
+                after: v0::PartialChannel {
+                    description: Some("General chat channel.".to_string()),
+                    ..Default::default()
+                }
             }
         );
     }
@@ -196,8 +280,50 @@ mod test {
 
         let status = harness
             .client
+            .patch(format!("/channels/{}", channel.id()))
+            .header(Header::new("X-Audit-Log-Reason", "Test Reason 1"))
+            .header(Header::new("x-session-token", session.token.clone()))
+            .json(&v0::DataEditChannel {
+                description: Some("General chat channel.".to_string()),
+                name: None,
+                owner: None,
+                icon: None,
+                nsfw: None,
+                archived: None,
+                voice: None,
+                remove: Vec::new(),
+            })
+            .dispatch()
+            .await
+            .status();
+
+        assert_eq!(status, Status::Ok);
+
+        let status = harness
+            .client
+            .patch(format!("/channels/{}", channel.id()))
+            .header(Header::new("X-Audit-Log-Reason", "Test Reason 2"))
+            .header(Header::new("x-session-token", session.token.clone()))
+            .json(&v0::DataEditChannel {
+                description: Some("New description.".to_string()),
+                name: None,
+                owner: None,
+                icon: None,
+                nsfw: None,
+                archived: None,
+                voice: None,
+                remove: Vec::new(),
+            })
+            .dispatch()
+            .await
+            .status();
+
+        assert_eq!(status, Status::Ok);
+
+        let status = harness
+            .client
             .delete(format!("/channels/{}", channel.id()))
-            .header(Header::new("X-Audit-Log-Reason", "Test Reason"))
+            .header(Header::new("X-Audit-Log-Reason", "Test Reason 3"))
             .header(Header::new("x-session-token", session.token.clone()))
             .dispatch()
             .await
@@ -227,11 +353,14 @@ mod test {
             panic!("Response included users when shouldnt")
         };
 
-        assert_eq!(entries.len(), 1);
+        assert_eq!(entries.len(), 3);
+        assert_eq!(users.len(), 1);
+
+        assert_eq!(&users[0].id, &user.id);
 
         let entry = &entries[0];
 
-        assert_eq!(entry.reason.as_deref(), Some("Test Reason"));
+        assert_eq!(entry.reason.as_deref(), Some("Test Reason 3"));
         assert_eq!(&entry.server, &server.id);
         assert_eq!(&entry.user, &user.id);
         assert_eq!(
@@ -242,7 +371,46 @@ mod test {
             }
         );
 
-        assert_eq!(users.len(), 1);
-        assert_eq!(&users[0].id, &user.id);
+        let entry = &entries[1];
+
+        assert_eq!(entry.reason.as_deref(), Some("Test Reason 2"));
+        assert_eq!(&entry.server, &server.id);
+        assert_eq!(&entry.user, &user.id);
+        assert_eq!(
+            &entry.action,
+            &v0::AuditLogEntryAction::ChannelEdit {
+                channel: channel.id().to_string(),
+                remove: Vec::new(),
+                before: v0::PartialChannel {
+                    description: Some("General chat channel.".to_string()),
+                    ..Default::default()
+                },
+                after: v0::PartialChannel {
+                    description: Some("New description.".to_string()),
+                    ..Default::default()
+                }
+            }
+        );
+
+        let entry = &entries[2];
+
+        assert_eq!(entry.reason.as_deref(), Some("Test Reason 1"));
+        assert_eq!(&entry.server, &server.id);
+        assert_eq!(&entry.user, &user.id);
+        assert_eq!(
+            &entry.action,
+            &v0::AuditLogEntryAction::ChannelEdit {
+                channel: channel.id().to_string(),
+                remove: Vec::new(),
+                before: v0::PartialChannel {
+                    description: None,
+                    ..Default::default()
+                },
+                after: v0::PartialChannel {
+                    description: Some("General chat channel.".to_string()),
+                    ..Default::default()
+                }
+            }
+        );
     }
 }

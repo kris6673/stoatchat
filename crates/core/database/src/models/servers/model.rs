@@ -231,6 +231,30 @@ impl Server {
         }
     }
 
+    pub fn generate_diff(&self, partial: &PartialServer, remove: &[FieldsServer]) -> PartialServer {
+        let mut before = PartialServer::default();
+
+        generate_diff!(
+            self, before, partial, remove,
+            (
+                owner,
+                name,
+                (FieldsServer::Description) description,
+                (FieldsServer::Categories) categories,
+                (FieldsServer::SystemMessages) system_messages,
+                roles,
+                default_permissions,
+                (FieldsServer::Icon) icon,
+                (FieldsServer::Banner) banner,
+                nsfw,
+                analytics,
+                discoverable,
+            )
+        );
+
+        before
+    }
+
     /// Ordered roles list
     pub fn ordered_roles(&self) -> Vec<(String, Role)> {
         let mut ordered_roles = self.roles.clone().into_iter().collect::<Vec<_>>();
@@ -368,6 +392,23 @@ impl Role {
         match field {
             FieldsRole::Colour => self.colour = None,
         }
+    }
+
+    pub fn generate_diff(&self, partial: &PartialRole, remove: &[FieldsRole]) -> PartialRole {
+        let mut before = PartialRole::default();
+
+        generate_diff!(
+            self, before, partial, remove,
+            (
+                name,
+                permissions,
+                (FieldsRole::Colour) colour,
+                hoist,
+                rank,
+            )
+        );
+
+        before
     }
 
     /// Delete a role

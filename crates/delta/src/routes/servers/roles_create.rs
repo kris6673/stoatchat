@@ -1,6 +1,7 @@
 use revolt_config::config;
 use revolt_database::{
-    AuditLogEntryAction, Database, Role, User, util::{permissions::DatabasePermissionQuery, reference::Reference}
+    util::{permissions::DatabasePermissionQuery, reference::Reference},
+    AuditLogEntryAction, Database, Role, User,
 };
 use revolt_models::v0;
 use revolt_permissions::{calculate_server_permissions, ChannelPermission};
@@ -44,9 +45,12 @@ pub async fn create(
 
     let role = Role::create(db, &server, data.name).await?;
 
-    AuditLogEntryAction::RoleCreate { role: role.id.clone(), name: role.name.clone() }
-        .insert(db, server.id, reason.0, user.id)
-        .await;
+    AuditLogEntryAction::RoleCreate {
+        role: role.id.clone(),
+        name: role.name.clone(),
+    }
+    .insert(db, server.id, reason.0, user.id)
+    .await;
 
     Ok(Json(v0::NewRoleResponse {
         id: role.id.clone(),

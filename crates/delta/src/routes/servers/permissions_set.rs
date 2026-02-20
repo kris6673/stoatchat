@@ -47,21 +47,25 @@ pub async fn set_role_permission(
     }
 
     // Ensure we have access to grant these permissions forwards
-    let current_value: Override = current_value.into();
+    let current_override: Override = current_value.into();
     permissions
-        .throw_permission_override(current_value, &data.permissions)
+        .throw_permission_override(current_override, &data.permissions)
         .await?;
 
     let override_field: OverrideField = data.permissions.into();
 
     server
-        .set_role_permission(db, &role_id, override_field.clone())
+        .set_role_permission(db, &role_id, override_field)
         .await?;
 
     AuditLogEntryAction::RoleEdit {
         role: role_id.clone(),
         remove: Vec::new(),
-        partial: PartialRole {
+        before: PartialRole {
+            permissions: Some(current_value),
+            ..Default::default()
+        },
+        after: PartialRole {
             permissions: Some(override_field),
             ..Default::default()
         },

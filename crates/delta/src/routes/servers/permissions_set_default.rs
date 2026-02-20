@@ -49,11 +49,14 @@ pub async fn set_default_server_permissions(
         ..Default::default()
     };
 
+    let before = server.generate_diff(&partial, &[]);
+
     server.update(db, partial.clone(), vec![]).await?;
 
     AuditLogEntryAction::ServerEdit {
         remove: Vec::new(),
-        partial,
+        before,
+        after: partial,
     }
     .insert(db, server.id.clone(), reason.0, user.id)
     .await;

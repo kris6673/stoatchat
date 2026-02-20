@@ -1,5 +1,5 @@
-use revolt_database::AuditLogEntryAction;
 use revolt_database::util::permissions::DatabasePermissionQuery;
+use revolt_database::AuditLogEntryAction;
 use revolt_database::{util::reference::Reference, Channel, Database, User};
 use revolt_models::v0;
 use revolt_permissions::{calculate_server_permissions, ChannelPermission};
@@ -38,12 +38,14 @@ pub async fn create_server_channel(
 
     let channel_name = data.name.clone();
 
-    let channel = Channel::create_server_channel(db, &mut server, data, true)
-        .await?;
+    let channel = Channel::create_server_channel(db, &mut server, data, true).await?;
 
-    AuditLogEntryAction::ChannelCreate { channel: channel.id().to_string(), name: channel_name }
-        .insert(db, server.id, reason.0, user.id)
-        .await;
+    AuditLogEntryAction::ChannelCreate {
+        channel: channel.id().to_string(),
+        name: channel_name,
+    }
+    .insert(db, server.id, reason.0, user.id)
+    .await;
 
     Ok(Json(channel.into()))
 }

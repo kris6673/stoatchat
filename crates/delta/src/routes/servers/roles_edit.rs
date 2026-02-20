@@ -1,5 +1,7 @@
 use revolt_database::{
-    AuditLogEntryAction, Database, FieldsRole, PartialRole, User, util::{permissions::DatabasePermissionQuery, reference::Reference}, voice::{VoiceClient, sync_voice_permissions}
+    util::{permissions::DatabasePermissionQuery, reference::Reference},
+    voice::{sync_voice_permissions, VoiceClient},
+    AuditLogEntryAction, Database, FieldsRole, PartialRole, User,
 };
 use revolt_models::v0;
 use revolt_permissions::{calculate_server_permissions, ChannelPermission};
@@ -64,13 +66,16 @@ pub async fn edit(
             .map(Into::into)
             .collect::<Vec<FieldsRole>>();
 
+        let before = role.generate_diff(&partial, &remove);
+
         role.update(db, &server.id, partial.clone(), remove.clone())
             .await?;
 
         AuditLogEntryAction::RoleEdit {
             role: role_id.clone(),
             remove,
-            partial,
+            before,
+            after: partial,
         }
         .insert(db, server.id.clone(), reason.0, user.id)
         .await;

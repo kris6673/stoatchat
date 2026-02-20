@@ -69,12 +69,15 @@ pub async fn set_default_channel_permissions(
                 let id = id.clone();
                 let server = server.clone();
 
+                let before = channel.generate_diff(&partial, &[]);
+
                 channel.update(db, partial.clone(), vec![]).await?;
 
                 AuditLogEntryAction::ChannelEdit {
                     channel: id,
                     remove: Vec::new(),
-                    partial,
+                    before,
+                    after: partial,
                 }
                 .insert(db, server, reason.0, user.id)
                 .await;

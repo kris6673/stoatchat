@@ -236,6 +236,24 @@ impl Member {
         }
     }
 
+    pub fn generate_diff(&self, partial: &PartialMember, remove: &[FieldsMember]) -> PartialMember {
+        let mut before = PartialMember::default();
+
+        generate_diff!(
+            self, before, partial, remove,
+            (
+                (FieldsMember::Nickname) nickname,
+                (FieldsMember::Avatar) avatar,
+                (FieldsMember::Timeout) timeout,
+                ((default) FieldsMember::Roles) roles,
+                ((default) FieldsMember::CanPublish) can_publish,
+                ((default) FieldsMember::CanReceive) can_receive,
+            )
+        );
+
+        before
+    }
+
     /// Get this user's current ranking
     pub fn get_ranking(&self, server: &Server) -> i64 {
         let mut value = i64::MAX;

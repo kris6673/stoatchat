@@ -1309,30 +1309,32 @@ pub async fn run_migrations(db: &MongoDb, revision: i32) -> i32 {
     if revision >= 50 {
         info!("Running migration [revision 50 / 28-11-2025]: Add audit logs collection");
 
-        db.db().create_collection("audit_logs")
+        db.db()
+            .create_collection("audit_logs")
             .await
             .expect("Failed to create audit_logs collection");
 
-        db.db().run_command(doc! {
-            "createIndexes": "audit_logs",
-            "indexes": [
-                {
-                    "key": {
-                        "expires_at": 1_i32,
+        db.db()
+            .run_command(doc! {
+                "createIndexes": "audit_logs",
+                "indexes": [
+                    {
+                        "key": {
+                            "expires_at": 1_i32,
+                        },
+                        "name": "expires_at_ttl",
+                        "expireAfterSeconds": 0
                     },
-                    "name": "expires_at_ttl",
-                    "expireAfterSeconds": 0
-                },
-                {
-                    "key": {
-                        "server": 1_i32,
+                    {
+                        "key": {
+                            "server": 1_i32,
+                        },
+                        "name": "audit_log_server"
                     },
-                    "name": "audit_log_server"
-                },
-            ]
-        })
-        .await
-        .expect("Failed to create audit_logs index");
+                ]
+            })
+            .await
+            .expect("Failed to create audit_logs index");
     };
 
     // Reminder to update LATEST_REVISION when adding new migrations.

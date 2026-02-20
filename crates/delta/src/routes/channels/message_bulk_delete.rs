@@ -1,6 +1,7 @@
 use chrono::Utc;
 use revolt_database::{
-    AuditLogEntryAction, Database, Message, User, util::{permissions::DatabasePermissionQuery, reference::Reference}
+    util::{permissions::DatabasePermissionQuery, reference::Reference},
+    AuditLogEntryAction, Database, Message, User,
 };
 use revolt_models::v0;
 use revolt_permissions::{calculate_channel_permissions, ChannelPermission};
@@ -53,13 +54,15 @@ pub async fn bulk_delete_messages(
         .await
         .throw_if_lacking_channel_permission(ChannelPermission::ManageMessages)?;
 
-    Message::bulk_delete(db, target.id, options.ids.clone())
-        .await?;
+    Message::bulk_delete(db, target.id, options.ids.clone()).await?;
 
     if let Some(server) = channel.server() {
-        AuditLogEntryAction::MessageBulkDelete { channel: channel.id().to_string(), count: options.ids.len() }
-            .insert(db, server.to_string(), reason.0, user.id)
-            .await;
+        AuditLogEntryAction::MessageBulkDelete {
+            channel: channel.id().to_string(),
+            count: options.ids.len(),
+        }
+        .insert(db, server.to_string(), reason.0, user.id)
+        .await;
     };
 
     Ok(EmptyResponse)

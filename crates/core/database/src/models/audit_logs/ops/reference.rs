@@ -22,7 +22,7 @@ impl AbstractAuditLogs for ReferenceDb {
     ) -> Result<Vec<AuditLogEntry>> {
         let lock = self.audit_logs.lock().await;
 
-        let logs = lock
+        let mut logs = lock
             .values()
             .filter(|entry| {
                 if entry.server != server {
@@ -65,10 +65,11 @@ impl AbstractAuditLogs for ReferenceDb {
 
                 true
             })
-            .take(query.limit.unwrap_or(50) as usize)
             .cloned()
-            .collect();
+            .collect::<Vec<_>>();
 
+        logs.sort_by(|a, b| b.id.cmp(&a.id));
+        logs.truncate(query.limit.unwrap_or(50) as usize);
         Ok(logs)
     }
 }
